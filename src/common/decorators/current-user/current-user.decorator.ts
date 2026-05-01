@@ -1,3 +1,17 @@
-import { SetMetadata } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Request } from 'express';
 
-export const CurrentUser = (...args: string[]) => SetMetadata('current-user', args);
+interface AuthenticatedUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+export const CurrentUser = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
+    const request = ctx
+      .switchToHttp()
+      .getRequest<Request & { user: AuthenticatedUser }>();
+    return request.user;
+  },
+);
